@@ -23,4 +23,26 @@ router.post('/signup', async (req, res)=> {
         console.log(err);
         res.status(500).json({error : 'Internal Server Error'});
     }
+});
+
+//Login Route
+router.post('/login', async(req, res)=>{
+    try{
+        const {aadharCardNumber, password} = req.body;
+
+        const user = await User.findOne({aadharCardNumber: aadharCardNumber});
+
+        if(!user || !(await user.comparePassword(password))){
+            return res.status(401).json({error: 'Invalid username or password'});
+        }
+
+        const payload = {
+            id: user.id
+        }
+        const token = generateToken(payload);
+        res.json({token});
+    }catch(err){
+        console.error(err);
+        res.status(500).json({error: 'Internal Server Error'})
+    }
 })
